@@ -7,20 +7,69 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            line-height: 1.6;
             margin: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+            color: #444;
+        }
+        p {
+            text-align: center;
+            font-size: 1.1em;
         }
         .location {
-            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         input[type="checkbox"] {
             margin-right: 10px;
+        }
+        .progress-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            height: 30px;
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #4caf50;
+            width: 0%;
+            line-height: 30px;
+            text-align: center;
+            color: white;
+            border-radius: 15px;
         }
     </style>
 </head>
 <body>
     <h1>日本必去觀光地清單</h1>
-    <p>以下是日本網友票選的 47 都道府縣必去景點，可以隨時勾選已完成的地點。</p>
+    <p>勾選您已完成的景點，我們會幫您計算完成百分比！</p>
+
+    <div class="progress-container">
+        <label>完成進度：</label>
+        <div class="progress-bar">
+            <div class="progress-bar-fill" id="progress-bar-fill">0%</div>
+        </div>
+    </div>
+
     <div id="locations">
         <div class="location">
             <input type="checkbox" id="hokkaido">
@@ -211,18 +260,43 @@
             <label for="okinawa">沖縄 → 美ら海水族館</label>
         </div>
     </div>
+
     <script>
+        // 獲取所有 checkbox 和進度條
         const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const progressBarFill = document.getElementById('progress-bar-fill');
+
+        // 本地存儲和進度計算
+        function updateProgress() {
+            const total = checkboxes.length;
+            const checked = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
+            const percentage = Math.round((checked / total) * 100);
+
+            // 更新進度條
+            progressBarFill.style.width = `${percentage}%`;
+            progressBarFill.textContent = `${percentage}%`;
+
+            // 保存狀態
+            checkboxes.forEach(checkbox => {
+                localStorage.setItem(checkbox.id, checkbox.checked ? "checked" : "unchecked");
+            });
+        }
+
+        // 初始化時載入本地存儲的數據
         checkboxes.forEach(checkbox => {
-            const id = checkbox.id;
-            const savedState = localStorage.getItem(id);
+            const savedState = localStorage.getItem(checkbox.id);
             if (savedState === "checked") {
                 checkbox.checked = true;
             }
-            checkbox.addEventListener('change', () => {
-                localStorage.setItem(id, checkbox.checked ? "checked" : "unchecked");
-            });
         });
+
+        // 綁定事件處理器
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateProgress);
+        });
+
+        // 初次更新進度條
+        updateProgress();
     </script>
 </body>
 </html>
